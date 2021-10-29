@@ -16,12 +16,17 @@ class BaseHandler {
   options: Options;
   range: Range | null;
   handler: string;
-  loading: HTMLElement;
   fileHolder: HTMLInputElement;
   handlerId: string;
   helpers = new Helpers();
   allowedFormatRegex: RegExp;
   possibleExtension: Set<string>;
+
+  get loading(): HTMLElement {
+    return document.getElementById(
+        `${Constants.ID_SPLIT_FLAG}.QUILL-LOADING`
+    );
+  }
 
   constructor(quill, options: Options) {
     this.quill = quill;
@@ -65,9 +70,6 @@ class BaseHandler {
 
   applyForToolbar() {
     const toolbar = this.quill.getModule('toolbar');
-    this.loading = document.getElementById(
-      `${Constants.ID_SPLIT_FLAG}.QUILL-LOADING`
-    );
     toolbar.addHandler(this.handler, this.selectLocalFile.bind(this));
   }
 
