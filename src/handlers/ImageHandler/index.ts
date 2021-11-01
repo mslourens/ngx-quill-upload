@@ -1,7 +1,5 @@
 import BaseHandler, { Options } from '../BaseHandler';
 import { Constants } from '../../utils';
-import Quill from 'quill';
-import { ImageBlot } from '../../blots';
 
 class ImageHandler extends BaseHandler {
   constructor(quill, options: Options) {
@@ -9,7 +7,6 @@ class ImageHandler extends BaseHandler {
 
     this.handler = Constants.blots.image;
     this.applyForToolbar();
-    Quill.register(ImageBlot, true);
   }
 
 }

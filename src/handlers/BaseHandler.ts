@@ -35,7 +35,7 @@ class BaseHandler {
 
     new Styled().apply();
 
-    if (this.isNotExistLoading()) {
+    if (this.loading == null) {
       const node = document.createElement('div');
       node.innerHTML = this.helpers.loadingHTML();
 
@@ -87,25 +87,16 @@ class BaseHandler {
     this.loading.setAttribute('class', Constants.LOADING_CLASS_NAME);
 
     const file = context.fileHolder.files[0];
-    this.handlerId = this.helpers.generateID();
-
-    const fileReader = new FileReader();
-    fileReader.addEventListener('load', () => {
-      this.insertBase64Data(fileReader.result, this.handlerId);
-    }, false);
-
     if (!file) {
       console.warn('[File not found] Something was wrong, please try again!!');
       return null;
     }
 
-    fileReader.readAsDataURL(file);
-
-    return { file, handlerId: this.handlerId };
+    return file;
   }
 
   fileChanged() {
-    const { file, handlerId } = this.loadFile(this);
+    const file = this.loadFile(this);
 
     if (!file) {
       return;
@@ -125,49 +116,30 @@ class BaseHandler {
       );
     }
 
-    this.embedFile(file, handlerId);
+    this.embedFile(file);
   }
 
-  embedFile(file: File, handlerId: string) {
+  embedFile(file: File) {
     this.options.upload(file).then(
       (url) => {
-        this.insertFileToEditor(url, handlerId);
+        this.insertFileToEditor(url);
         this.loading.removeAttribute('class');
         this.loading.setAttribute('class', Constants.NONE_DISPLAY_CLASS_NAME);
       },
       (error) => {
         this.loading.removeAttribute('class');
         this.loading.setAttribute('class', Constants.NONE_DISPLAY_CLASS_NAME);
-        setTimeout(() => {
-          const el = document.getElementById(handlerId);
-          el.remove();
-        }, 1000);
       }
     );
   }
 
-  insertBase64Data(url: string | ArrayBuffer, handlerId: string) {
+  insertFileToEditor(url: string) {
     const range = this.range;
     this.quill.insertEmbed(
-      range.index,
-      this.handler,
-      `${handlerId}${Constants.ID_SPLIT_FLAG}${url}`
+        range.index,
+        this.handler,
+        url
     );
-
-    const el = document.getElementById(handlerId);
-
-    if (el) {
-      el.setAttribute('class', Constants.QUILL_UPLOAD_HOLDER_CLASS_NAME);
-    }
-  }
-
-  insertFileToEditor(url: string, handlerId: string) {
-    const el = document.getElementById(handlerId);
-    if (el) {
-      el.setAttribute('src', url);
-      el.removeAttribute('id');
-      el.removeAttribute('class');
-    }
   }
 
   isValidExtension(extension: string) {
@@ -178,13 +150,6 @@ class BaseHandler {
     return type && type.startsWith(this.handler);
   }
 
-  isNotExistLoading() {
-    const loading = document.getElementById(
-      `${Constants.ID_SPLIT_FLAG}.QUILL-LOADING`
-    );
-
-    return loading == null;
-  }
 }
 
 export default BaseHandler;
